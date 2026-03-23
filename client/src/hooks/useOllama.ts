@@ -10,7 +10,7 @@ export function useOllama(options: UseOllamaOptions = {}) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const model = options.model || 'llama3'
+  const model = import.meta.env.VITE_OLLAMA_MODEL || options.model || 'llama3.2:3b'
 
   const generateDescription = async (item: {
     title: string

@@ -4,7 +4,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "tsx server.ts"
+    "start": "tsx server.ts",
+    "build": "echo 'No build step needed for TypeScript server'"
   },
   "keywords": [],
   "author": "",

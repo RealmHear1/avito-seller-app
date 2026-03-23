@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: avito-ollama-prod
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - ollama serve & sleep 2; ollama run llama3.2:3b "hello" >/dev/null 2>&1 || ollama pull llama3.2:3b; wait
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    container_name: avito-client-prod
+    ports:
+      - "5173:80"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - VITE_API_URL=http://server:8080
+      - VITE_OLLAMA_MODEL=llama3.2:3b
+    depends_on:
+      - ollama
+      - server
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    container_name: avito-server-prod
+    ports:
+      - "8080:8080"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - NODE_ENV=production
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    driver: local
