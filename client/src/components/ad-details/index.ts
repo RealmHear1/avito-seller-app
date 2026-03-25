@@ -1,5 +1,6 @@
 export { AdCharacteristicsBlock } from './AdCharacteristicsBlock'
 export { AdDescriptionBlock } from './AdDescriptionBlock'
+export { AdDetailsFlashNotice } from './AdDetailsFlashNotice'
 export { AdDetailsGallery } from './AdDetailsGallery'
 export { AdDetailsHeader } from './AdDetailsHeader'
 export { AdMissingFieldsBanner } from './AdMissingFieldsBanner'
