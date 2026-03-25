@@ -64,7 +64,15 @@ export function NotFoundPage() {
           Похоже, такого адреса в приложении нет. Вернись к списку объявлений и продолжим оттуда.
         </Typography>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', pt: '8px' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+            pt: '8px',
+          }}
+        >
           <Button variant="outlined" onClick={() => navigate(-1)}>
             Назад
           </Button>

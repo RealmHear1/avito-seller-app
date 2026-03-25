@@ -13,6 +13,15 @@ export function MuiThemeProvider({ children }: MuiThemeProviderProps) {
         palette: {
           mode: 'light',
         },
+        components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              body: {
+                transition: 'background-color 0.2s ease, color 0.2s ease',
+              },
+            },
+          },
+        },
       }),
     [],
   )
