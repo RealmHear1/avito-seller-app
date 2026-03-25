@@ -63,6 +63,8 @@ interface ItemsGetRequest extends Fastify.RequestGenericInterface {
     skip?: string;
     categories?: string;
     needsRevision?: string;
+    sortColumn?: string;
+    sortDirection?: string;
   };
 }
 
@@ -99,12 +101,15 @@ fastify.get<ItemsGetRequest>('/items', request => {
           comparisonValue =
             new Date(item1.createdAt).valueOf() -
             new Date(item2.createdAt).valueOf();
+        } else if (sortColumn === 'price') {
+          comparisonValue = (item1.price ?? Number.MAX_SAFE_INTEGER) - (item2.price ?? Number.MAX_SAFE_INTEGER);
         }
 
         return (sortDirection === 'desc' ? -1 : 1) * comparisonValue;
       })
       .slice(skip, skip + limit)
       .map(item => ({
+        id: item.id,
         category: item.category,
         title: item.title,
         price: item.price,
@@ -140,10 +145,7 @@ fastify.put<ItemUpdateRequest>('/items/:id', (request, reply) => {
   }
 
   try {
-    const parsedData = ItemUpdateInSchema.parse({
-      category: ITEMS[itemIndex].category,
-      ...(request.body as {}),
-    });
+    const parsedData = ItemUpdateInSchema.parse(request.body as {});
 
     ITEMS[itemIndex] = {
       id: ITEMS[itemIndex].id,
