@@ -7,6 +7,7 @@ import {
   getItemCharacteristics,
   getMissingFieldLabels,
 } from '../helpers/itemPresentation'
+import type { AdDetailsViewProps } from '../types/ad-details'
 
 export function useAdDetailsPage() {
   const navigate = useNavigate()
@@ -26,21 +27,22 @@ export function useAdDetailsPage() {
   const updatedAtLabel =
     item && item.updatedAt !== item.createdAt ? formatItemDateTime(item.updatedAt) : undefined
   const priceLabel = item ? formatPrice(item.price) : ''
+  const viewProps: AdDetailsViewProps | null = item
+    ? {
+        item,
+        characteristics,
+        createdAtLabel,
+        missingFields,
+        onBack: () => navigate('/ads'),
+        onEdit: () => navigate(`/ads/${item.id}/edit`),
+        priceLabel,
+        updatedAtLabel,
+      }
+    : null
 
   return {
     itemId,
     itemQuery,
-    viewProps: item
-      ? {
-          item,
-          characteristics,
-          createdAtLabel,
-          missingFields,
-          onBack: () => navigate('/ads'),
-          onEdit: () => navigate(`/ads/${item.id}/edit`),
-          priceLabel,
-          updatedAtLabel,
-        }
-      : null,
+    viewProps,
   }
 }

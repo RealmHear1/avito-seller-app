@@ -1,11 +1,12 @@
-import type { CategoryOption, SortOption } from './types'
+import { CATEGORY_LABELS } from './items'
+import type { CategoryOption, SortOption } from '../types/ads'
 
 export const PAGE_SIZE = 10
 
 export const categoryOptions: CategoryOption[] = [
-  { key: 'auto', label: 'Авто' },
-  { key: 'electronics', label: 'Электроника' },
-  { key: 'real_estate', label: 'Недвижимость' },
+  { key: 'auto', label: CATEGORY_LABELS.auto },
+  { key: 'electronics', label: CATEGORY_LABELS.electronics },
+  { key: 'real_estate', label: CATEGORY_LABELS.real_estate },
 ]
 
 export const sortOptions: SortOption[] = [

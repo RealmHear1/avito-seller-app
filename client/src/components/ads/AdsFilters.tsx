@@ -1,6 +1,6 @@
 import { Check, KeyboardArrowDown } from '@mui/icons-material'
 import { Box, ButtonBase, Divider, Typography } from '@mui/material'
-import { categoryOptions } from './constants'
+import { categoryOptions } from '../../constants/ads'
 import type { ItemCategory } from '../../types/items'
 
 type AdsFiltersProps = {

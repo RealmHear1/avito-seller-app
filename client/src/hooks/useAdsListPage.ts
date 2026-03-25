@@ -2,110 +2,21 @@ import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getItemById, getItems } from '../api/items'
-import { PAGE_SIZE, sortOptions } from '../components/ads/constants'
-import type { ViewMode } from '../components/ads/types'
+import { PAGE_SIZE, sortOptions } from '../constants/ads'
+import { ADS_COUNT_STALE_TIME, ADS_SEARCH_DEBOUNCE_MS, ADS_STALE_TIME } from '../constants/query'
+import { readAdsListState, writeAdsListState } from '../helpers/adsListState'
+import {
+  buildItemsWithClientNeedsRevision,
+  filterAdsItems,
+  sortAdsItems,
+} from '../helpers/adsListItems'
 import { getAdDeclension } from '../helpers/declension'
-import { getNeedsRevision } from '../helpers/itemPresentation'
+import type { ViewMode } from '../types/ads'
 import type { ItemCategory, ItemDetails } from '../types/items'
-
-const ADS_LIST_STATE_KEY = 'ads-list-state'
-type AdsListPersistedState = {
-  currentPage: number
-  isCategoriesOpen: boolean
-  onlyNeedsRevision: boolean
-  searchInput: string
-  searchQuery: string
-  selectedCategories: ItemCategory[]
-  sortBy: string
-  viewMode: ViewMode
-}
-
-function readPersistedState(): AdsListPersistedState {
-  if (typeof window === 'undefined') {
-    return {
-      currentPage: 1,
-      isCategoriesOpen: true,
-      onlyNeedsRevision: false,
-      searchInput: '',
-      searchQuery: '',
-      selectedCategories: [],
-      sortBy: 'createdAtDesc',
-      viewMode: 'grid',
-    }
-  }
-
-  const rawState = window.sessionStorage.getItem(ADS_LIST_STATE_KEY)
-
-  if (!rawState) {
-    return {
-      currentPage: 1,
-      isCategoriesOpen: true,
-      onlyNeedsRevision: false,
-      searchInput: '',
-      searchQuery: '',
-      selectedCategories: [],
-      sortBy: 'createdAtDesc',
-      viewMode: 'grid',
-    }
-  }
-
-  try {
-    const parsedState = JSON.parse(rawState) as Partial<AdsListPersistedState>
-
-    return {
-      currentPage:
-        typeof parsedState.currentPage === 'number' && parsedState.currentPage > 0
-          ? parsedState.currentPage
-          : 1,
-      isCategoriesOpen: parsedState.isCategoriesOpen ?? true,
-      onlyNeedsRevision: parsedState.onlyNeedsRevision ?? false,
-      searchInput: typeof parsedState.searchInput === 'string' ? parsedState.searchInput : '',
-      searchQuery: typeof parsedState.searchQuery === 'string' ? parsedState.searchQuery : '',
-      selectedCategories: Array.isArray(parsedState.selectedCategories)
-        ? parsedState.selectedCategories.filter((category): category is ItemCategory =>
-            ['auto', 'electronics', 'real_estate'].includes(category),
-          )
-        : [],
-      sortBy:
-        typeof parsedState.sortBy === 'string' &&
-        sortOptions.some((option) => option.value === parsedState.sortBy)
-          ? parsedState.sortBy
-          : 'createdAtDesc',
-      viewMode: parsedState.viewMode === 'list' ? 'list' : 'grid',
-    }
-  } catch {
-    return {
-      currentPage: 1,
-      isCategoriesOpen: true,
-      onlyNeedsRevision: false,
-      searchInput: '',
-      searchQuery: '',
-      selectedCategories: [],
-      sortBy: 'createdAtDesc',
-      viewMode: 'grid',
-    }
-  }
-}
-
-function compareNullableNumbers(left: number | null | undefined, right: number | null | undefined) {
-  if (left == null && right == null) {
-    return 0
-  }
-
-  if (left == null) {
-    return 1
-  }
-
-  if (right == null) {
-    return -1
-  }
-
-  return left - right
-}
 
 export function useAdsListPage() {
   const navigate = useNavigate()
-  const [persistedState] = useState(readPersistedState)
+  const [persistedState] = useState(readAdsListState)
 
   const [searchInput, setSearchInput] = useState(persistedState.searchInput)
   const [searchQuery, setSearchQuery] = useState(persistedState.searchQuery)
@@ -128,7 +39,7 @@ export function useAdsListPage() {
 
       setSearchQuery(trimmedSearch)
       setCurrentPage(1)
-    }, 400)
+    }, ADS_SEARCH_DEBOUNCE_MS)
 
     return () => window.clearTimeout(timeoutId)
   }, [searchInput, searchQuery])
@@ -148,7 +59,7 @@ export function useAdsListPage() {
         },
         signal,
       ),
-    staleTime: 60_000,
+    staleTime: ADS_COUNT_STALE_TIME,
   })
 
   const adsQuery = useQuery({
@@ -168,14 +79,14 @@ export function useAdsListPage() {
         signal,
       ),
     placeholderData: keepPreviousData,
-    staleTime: 30_000,
+    staleTime: ADS_STALE_TIME,
   })
 
   const adDetailsQueries = useQueries({
     queries: (adsQuery.data?.items ?? []).map((item) => ({
       queryKey: ['ad', item.id],
       queryFn: ({ signal }: { signal: AbortSignal }) => getItemById(item.id, signal),
-      staleTime: 30_000,
+      staleTime: ADS_STALE_TIME,
     })),
   })
 
@@ -192,57 +103,17 @@ export function useAdsListPage() {
   const areDetailsPending = adDetailsQueries.some((query) => query.isPending)
 
   const itemsWithClientNeedsRevision = useMemo(
-    () =>
-      (adsQuery.data?.items ?? []).map((item) => {
-        const itemDetails = itemDetailsMap.get(item.id)
-
-        return {
-          ...item,
-          needsRevision: itemDetails ? getNeedsRevision(itemDetails) : item.needsRevision,
-        }
-      }),
+    () => buildItemsWithClientNeedsRevision(adsQuery.data?.items ?? [], itemDetailsMap),
     [adsQuery.data?.items, itemDetailsMap],
   )
 
   const filteredItems = useMemo(() => {
-    let nextItems = itemsWithClientNeedsRevision
-
-    if (selectedCategories.length > 0) {
-      nextItems = nextItems.filter((item) => selectedCategories.includes(item.category))
-    }
-
-    if (onlyNeedsRevision) {
-      nextItems = nextItems.filter((item) => item.needsRevision)
-    }
-
-    return nextItems
+    return filterAdsItems(itemsWithClientNeedsRevision, selectedCategories, onlyNeedsRevision)
   }, [itemsWithClientNeedsRevision, onlyNeedsRevision, selectedCategories])
 
   const sortedItems = useMemo(() => {
-    const nextItems = [...filteredItems]
-
-    nextItems.sort((left, right) => {
-      if (sortOption.sortColumn === 'title') {
-        const titleComparison = left.title.localeCompare(right.title, 'ru', { sensitivity: 'base' })
-
-        return sortOption.sortDirection === 'asc' ? titleComparison : -titleComparison
-      }
-
-      if (sortOption.sortColumn === 'price') {
-        const priceComparison = compareNullableNumbers(left.price, right.price)
-
-        return sortOption.sortDirection === 'asc' ? priceComparison : -priceComparison
-      }
-
-      const leftCreatedAt = itemDetailsMap.get(left.id)?.createdAt ?? ''
-      const rightCreatedAt = itemDetailsMap.get(right.id)?.createdAt ?? ''
-      const dateComparison = new Date(leftCreatedAt).getTime() - new Date(rightCreatedAt).getTime()
-
-      return sortOption.sortDirection === 'asc' ? dateComparison : -dateComparison
-    })
-
-    return nextItems
-  }, [filteredItems, itemDetailsMap, sortOption.sortColumn, sortOption.sortDirection])
+    return sortAdsItems(filteredItems, itemDetailsMap, sortOption)
+  }, [filteredItems, itemDetailsMap, sortOption])
 
   const headerTotalCount = adsCountQuery.data?.total ?? adsQuery.data?.total ?? 0
   const filteredCount = sortedItems.length
@@ -253,19 +124,16 @@ export function useAdsListPage() {
   const safeCurrentPage = Math.min(currentPage, totalPages)
 
   useEffect(() => {
-    window.sessionStorage.setItem(
-      ADS_LIST_STATE_KEY,
-      JSON.stringify({
-        currentPage: safeCurrentPage,
-        isCategoriesOpen,
-        onlyNeedsRevision,
-        searchInput,
-        searchQuery,
-        selectedCategories,
-        sortBy,
-        viewMode,
-      } satisfies AdsListPersistedState),
-    )
+    writeAdsListState({
+      currentPage: safeCurrentPage,
+      isCategoriesOpen,
+      onlyNeedsRevision,
+      searchInput,
+      searchQuery,
+      selectedCategories,
+      sortBy,
+      viewMode,
+    })
   }, [
     isCategoriesOpen,
     onlyNeedsRevision,

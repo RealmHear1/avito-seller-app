@@ -1,0 +1,1 @@
+export const AD_GALLERY_PLACEHOLDER_COUNT = 4

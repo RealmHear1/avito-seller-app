@@ -1,31 +1,12 @@
+import {
+  CATEGORY_LABELS,
+  CONDITION_LABELS,
+  ELECTRONICS_TYPE_LABELS,
+  PROPERTY_TYPE_LABELS,
+  TRANSMISSION_LABELS,
+} from '../constants/items'
+import type { LabeledValue } from '../types/common'
 import type { ItemCategory, ItemDetails } from '../types/items'
-
-type LabeledValue = {
-  label: string
-  value: string
-}
-
-const transmissionLabels = {
-  automatic: 'Автомат',
-  manual: 'Механика',
-} as const
-
-const propertyTypeLabels = {
-  flat: 'Квартира',
-  house: 'Дом',
-  room: 'Комната',
-} as const
-
-const electronicsTypeLabels = {
-  phone: 'Телефон',
-  laptop: 'Ноутбук',
-  misc: 'Другое',
-} as const
-
-const conditionLabels = {
-  new: 'Новый',
-  used: 'Б/у',
-} as const
 
 function isEmptyValue(value: unknown): boolean {
   if (value == null) {
@@ -40,15 +21,7 @@ function isEmptyValue(value: unknown): boolean {
 }
 
 export function getCategoryLabel(category: ItemCategory): string {
-  if (category === 'auto') {
-    return 'Авто'
-  }
-
-  if (category === 'electronics') {
-    return 'Электроника'
-  }
-
-  return 'Недвижимость'
+  return CATEGORY_LABELS[category]
 }
 
 export function formatPrice(price: number | null): string {
@@ -89,11 +62,13 @@ export function getItemCharacteristics(item: ItemDetails): LabeledValue[] {
       },
       {
         label: 'Коробка',
-        value: item.params.transmission ? transmissionLabels[item.params.transmission] : '',
+        value: item.params.transmission ? TRANSMISSION_LABELS[item.params.transmission] : '',
       },
       {
         label: 'Пробег',
-        value: item.params.mileage ? `${new Intl.NumberFormat('ru-RU').format(item.params.mileage)} км` : '',
+        value: item.params.mileage
+          ? `${new Intl.NumberFormat('ru-RU').format(item.params.mileage)} км`
+          : '',
       },
       {
         label: 'Мощность',
@@ -106,7 +81,7 @@ export function getItemCharacteristics(item: ItemDetails): LabeledValue[] {
     return [
       {
         label: 'Тип',
-        value: item.params.type ? propertyTypeLabels[item.params.type] : '',
+        value: item.params.type ? PROPERTY_TYPE_LABELS[item.params.type] : '',
       },
       { label: 'Адрес', value: item.params.address ?? '' },
       {
@@ -123,13 +98,13 @@ export function getItemCharacteristics(item: ItemDetails): LabeledValue[] {
   return [
     {
       label: 'Тип',
-      value: item.params.type ? electronicsTypeLabels[item.params.type] : '',
+      value: item.params.type ? ELECTRONICS_TYPE_LABELS[item.params.type] : '',
     },
     { label: 'Бренд', value: item.params.brand ?? '' },
     { label: 'Модель', value: item.params.model ?? '' },
     {
       label: 'Состояние',
-      value: item.params.condition ? conditionLabels[item.params.condition] : '',
+      value: item.params.condition ? CONDITION_LABELS[item.params.condition] : '',
     },
     { label: 'Цвет', value: item.params.color ?? '' },
   ].filter((entry) => entry.value)

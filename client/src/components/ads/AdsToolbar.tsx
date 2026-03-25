@@ -1,6 +1,6 @@
 import { Box, ButtonBase, IconButton, InputBase, Menu, MenuItem } from '@mui/material'
 import { KeyboardArrowDown, Search } from '@mui/icons-material'
-import type { SortOption, ViewMode } from './types'
+import type { SortOption, ViewMode } from '../../types/ads'
 
 type AdsToolbarProps = {
   searchInput: string

@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Typography } from '@mui/material'
 import { formatPrice, getCategoryLabel } from '../../helpers/itemPresentation'
+import type { ViewMode } from '../../types/ads'
 import type { ListItem } from '../../types/items'
-import type { ViewMode } from './types'
 import { RevisionBadge } from './RevisionBadge'
 
 type AdCardProps = {

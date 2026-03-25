@@ -1,23 +1,7 @@
 import { Box } from '@mui/material'
+import { AD_GALLERY_PLACEHOLDER_COUNT } from '../../constants/adDetails'
+import { getGalleryImages } from '../../helpers/adDetailsGallery'
 import type { ItemDetails } from '../../types/items'
-
-function getGalleryImages(item: ItemDetails): string[] {
-  const itemWithImages = item as ItemDetails & {
-    images?: string[]
-    photos?: string[]
-  }
-
-  const rawImages = itemWithImages.images ?? itemWithImages.photos ?? []
-  const validImages = rawImages.filter(
-    (image): image is string => typeof image === 'string' && image.length > 0,
-  )
-
-  if (validImages.length > 0) {
-    return validImages
-  }
-
-  return Array.from({ length: 4 }, () => '/placeholder-image.png')
-}
 
 type AdDetailsGalleryProps = {
   item: ItemDetails
@@ -26,7 +10,10 @@ type AdDetailsGalleryProps = {
 export function AdDetailsGallery({ item }: AdDetailsGalleryProps) {
   const galleryImages = getGalleryImages(item)
   const mainImage = galleryImages[0] ?? '/placeholder-image.png'
-  const thumbnailImages = galleryImages.slice(0, Math.max(galleryImages.length, 4))
+  const thumbnailImages = galleryImages.slice(
+    0,
+    Math.max(galleryImages.length, AD_GALLERY_PLACEHOLDER_COUNT),
+  )
 
   return (
     <Box sx={{ width: '480px', display: 'flex', flexDirection: 'column', gap: '12px' }}>

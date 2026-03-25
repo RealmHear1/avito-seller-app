@@ -1,7 +1,7 @@
 import { Alert, Box, ButtonBase, CircularProgress, Typography } from '@mui/material'
 import { getRequestErrorMessage } from '../../api/items'
+import type { ViewMode } from '../../types/ads'
 import type { ListItem } from '../../types/items'
-import type { ViewMode } from './types'
 import { AdCard } from './AdCard'
 import { AdsPagination } from './AdsPagination'
 

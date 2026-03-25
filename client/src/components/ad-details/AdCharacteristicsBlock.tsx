@@ -1,7 +1,8 @@
 import { Box, Typography } from '@mui/material'
+import type { LabeledValue } from '../../types/common'
 
 type AdCharacteristicsBlockProps = {
-  characteristics: Array<{ label: string; value: string }>
+  characteristics: LabeledValue[]
 }
 
 export function AdCharacteristicsBlock({ characteristics }: AdCharacteristicsBlockProps) {
