@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AdsListPage } from '../pages/AdsListPage'
 import { AdDetailsPage } from '../pages/AdDetailsPage'
 import { AdEditPage } from '../pages/AdEditPage'
+import { NotFoundPage } from '../pages/NotFoundPage'
 
 export function AppRouter() {
   return (
@@ -10,7 +11,7 @@ export function AppRouter() {
       <Route path="/ads" element={<AdsListPage />} />
       <Route path="/ads/:id" element={<AdDetailsPage />} />
       <Route path="/ads/:id/edit" element={<AdEditPage />} />
-      <Route path="*" element={<div>Not found</div>} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
