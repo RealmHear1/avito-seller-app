@@ -106,7 +106,7 @@ export function AdsToolbar({
             >
               <Box
                 component="img"
-                src={viewMode === 'grid' ? '/icons/grid-blue.png' : '/icons/grid-black.png'}
+                src={viewMode === 'grid' ? '/icons/grid-blue.svg' : '/icons/grid-black.svg'}
                 alt="Сетка"
                 sx={{ width: '14px', height: '14px' }}
               />
@@ -119,7 +119,7 @@ export function AdsToolbar({
             >
               <Box
                 component="img"
-                src={viewMode === 'list' ? '/icons/list-blue.png' : '/icons/list-black.png'}
+                src={viewMode === 'list' ? '/icons/list-blue.svg' : '/icons/list-black.svg'}
                 alt="Список"
                 sx={{ width: '16.39px', height: '13.66px' }}
               />

@@ -67,6 +67,17 @@ export function formatItemDate(date: string): string {
   }).format(new Date(date))
 }
 
+export function formatItemDateTime(date: string): string {
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+    .format(new Date(date))
+    .replace(' в ', ' ')
+}
+
 export function getItemCharacteristics(item: ItemDetails): LabeledValue[] {
   if (item.category === 'auto') {
     return [

@@ -128,7 +128,7 @@ export function AdCard({ ad, viewMode, onOpen }: AdCardProps) {
       onClick={onOpen}
       sx={{
         width: '200px',
-        height: '268px',
+        height: '298px',
         borderRadius: '16px',
         border: '1px solid #F0F0F0',
         bgcolor: '#FFFFFF',
